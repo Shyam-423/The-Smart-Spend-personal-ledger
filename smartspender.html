@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SmartSpender</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green-dark: #1a3d2b;
+    --green-mid: #2d6a4f;
+    --green-light: #52b788;
+    --green-accent: #40c074;
+    --cream: #f5f0e8;
+    --cream-dark: #ede8df;
+    --red: #e63946;
+    --red-light: #ffeaea;
+    --gold: #f4a261;
+    --text-dark: #1a1a1a;
+    --text-mid: #555;
+    --text-light: #888;
+    --white: #ffffff;
+    --shadow: 0 4px 24px rgba(26,61,43,0.10);
+    --shadow-lg: 0 8px 40px rgba(26,61,43,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .app {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: var(--cream);
+    position: relative;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--white);
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--cream-dark);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--green-dark);
+    letter-spacing: -0.3px;
+  }
+  .header-icon {
+    width: 36px; height: 36px;
+    background: var(--green-dark);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s;
+  }
+  .header-icon:hover { background: var(--green-mid); }
+
+  /* SETUP SCREEN */
+  .setup-screen {
+    position: fixed; inset: 0;
+    background: var(--green-dark);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 999;
+    padding: 32px;
+    gap: 28px;
+  }
+  .setup-screen h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--white);
+    text-align: center;
+    line-height: 1.2;
+  }
+  .setup-screen p {
+    color: rgba(255,255,255,0.65);
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .setup-input-wrap {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .setup-input-wrap span { color: var(--green-accent); font-size: 22px; font-weight: 700; }
+  .setup-input-wrap input {
+    background: none; border: none; outline: none;
+    color: var(--white);
+    font-size: 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    width: 100%;
+  }
+  .setup-input-wrap input::placeholder { color: rgba(255,255,255,0.25); }
+  .btn-primary {
+    width: 100%;
+    background: var(--green-accent);
+    color: var(--green-dark);
+    font-size: 17px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    border: none;
+    border-radius: 14px;
+    padding: 17px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+    letter-spacing: 0.2px;
+  }
+  .btn-primary:hover { background: #36d46a; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* CALENDAR SECTION */
+  .calendar-section {
+    background: var(--white);
+    padding: 16px 20px 20px;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cal-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 19px;
+    color: var(--text-dark);
+  }
+  .cal-nav {
+    background: none; border: none; cursor: pointer;
+    color: var(--green-mid);
+    font-size: 18px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .cal-nav:hover { background: var(--cream); }
+  .cal-icon { font-size: 22px; cursor: pointer; }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .cal-day-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-light);
+    padding: 4px 0 8px;
+    letter-spacing: 0.5px;
+  }
+  .cal-cell {
+    position: relative;
+    text-align: center;
+    padding: 8px 2px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-dark);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.15s;
+  }
+  .cal-cell:hover { background: var(--cream); }
+  .cal-cell.empty { cursor: default; }
+  .cal-cell.selected {
+    background: var(--green-dark) !important;
+    color: var(--white) !important;
+    font-weight: 700;
+    border-radius: 10px;
+  }
+  .cal-cell.has-dot::after {
+    content: '';
+    position: absolute;
+    bottom: 3px; left: 50%;
+    transform: translateX(-50%);
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green-accent);
+  }
+  .cal-cell.selected.has-dot::after { background: var(--white); }
+  .cal-cell.has-expense::after { background: var(--gold); }
+
+  /* MONTHLY SUMMARY BAR */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    background: var(--white);
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .summary-item {
+    padding: 14px 10px;
+    text-align: center;
+    border-right: 1px solid var(--cream-dark);
+  }
+  .summary-item:last-child { border-right: none; }
+  .summary-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .summary-value {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .summary-value.red { color: var(--red); }
+  .summary-value.green { color: var(--green-mid); }
+  .summary-value.neutral { color: var(--text-dark); }
+
+  /* DA CARD */
+  .da-card {
+    margin: 16px 16px 0;
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+    border-radius: 20px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .da-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .da-left .da-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .da-left .da-amount {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--white);
+    font-family: 'DM Serif Display', serif;
+  }
+  .da-right { text-align: right; }
+  .da-right .da-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .da-right .remaining-amount {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--green-accent);
+    font-family: 'DM Serif Display', serif;
+    transition: color 0.3s;
+  }
+  .da-right .remaining-amount.negative { color: #ff6b6b; }
+
+  /* SAVINGS STRIP */
+  .savings-strip {
+    margin: 10px 16px 0;
+    background: var(--white);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1.5px dashed var(--green-light);
+  }
+  .savings-strip span:first-child {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+  }
+  .savings-strip .savings-val {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green-mid);
+  }
+
+  /* TABS */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 430px;
+    background: var(--white);
+    border-top: 1px solid var(--cream-dark);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    z-index: 100;
+  }
+  .tab-btn {
+    padding: 14px 10px 12px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    cursor: pointer;
+    background: none; border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-light);
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn.active { color: var(--green-dark); border-bottom-color: var(--green-dark); }
+  .tab-icon { font-size: 20px; }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 68px;
+    right: calc(50% - 215px + 16px);
+    width: 56px; height: 56px;
+    background: var(--green-accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    color: var(--green-dark);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(64,192,116,0.45);
+    z-index: 99;
+    border: none;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .fab:hover { background: #36d46a; transform: scale(1.07); }
+
+  /* RECORDS TAB */
+  .records-section { padding: 16px; }
+  .day-group { margin-bottom: 10px; }
+  .day-group-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+    padding: 6px 4px;
+    text-transform: uppercase;
+  }
+  .record-card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 6px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  }
+  .record-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .record-icon.expense { background: #fff0f0; }
+  .record-icon.income { background: #f0fff5; }
+  .record-icon.curveball { background: #fff8ee; }
+  .record-info { flex: 1; }
+  .record-type {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+  .record-note {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 1px;
+  }
+  .record-amount {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .record-amount.red { color: var(--red); }
+  .record-amount.green { color: var(--green-mid); }
+
+  /* ANALYSIS TAB */
+  .analysis-section { padding: 16px; }
+  .analysis-card {
+    background: var(--white);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .analysis-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+  }
+  .cat-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .cat-label {
+    width: 80px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-mid);
+    flex-shrink: 0;
+  }
+  .cat-bar-wrap {
+    flex: 1;
+    background: var(--cream);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .cat-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+  .cat-amount {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
+    width: 60px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .stat-box {
+    background: var(--cream);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .stat-box .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .stat-box .stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    font-family: 'DM Serif Display', serif;
+  }
+  .stat-box .stat-val.green { color: var(--green-mid); }
+  .stat-box .stat-val.red { color: var(--red); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--white);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px 36px;
+    width: 100%;
+    max-width: 430px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--cream-dark);
+    border-radius: 999px;
+    margin: 0 auto 24px;
+  }
+  .modal h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    background: var(--cream);
+    border: 1.5px solid var(--cream-dark);
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--green-mid); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .type-toggle {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; margin-bottom: 16px;
+  }
+  .type-btn {
+    padding: 10px 6px;
+    border-radius: 10px;
+    border: 1.5px solid var(--cream-dark);
+    background: var(--cream);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-mid);
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .type-btn.active-expense { background: #fff0f0; border-color: var(--red); color: var(--red); }
+  .type-btn.active-income { background: #f0fff5; border-color: var(--green-mid); color: var(--green-mid); }
+  .type-btn.active-curveball { background: #fff8ee; border-color: var(--gold); color: var(--gold); }
+  .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+  .btn-cancel {
+    padding: 15px;
+    border-radius: 12px;
+    border: 1.5px solid var(--cream-dark);
+    background: var(--cream);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-mid);
+    cursor: pointer;
+  }
+  .btn-confirm {
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    background: var(--green-dark);
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-confirm:hover { background: var(--green-mid); }
+
+  /* ALERT MODAL */
+  .alert-modal {
+    background: var(--white);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px 36px;
+    width: 100%;
+    max-width: 430px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .modal-overlay.open .alert-modal { transform: translateY(0); }
+  .alert-icon { font-size: 40px; margin-bottom: 12px; text-align: center; }
+  .alert-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .alert-body {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.65;
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .alert-body strong { color: var(--text-dark); }
+  .alert-options { display: flex; flex-direction: column; gap: 10px; }
+  .alert-option-btn {
+    padding: 15px 18px;
+    border-radius: 14px;
+    border: 1.5px solid var(--cream-dark);
+    background: var(--cream);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-dark);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .alert-option-btn:hover { border-color: var(--green-mid); background: #f0fff5; }
+  .alert-option-btn .opt-title { font-size: 14px; font-weight: 700; color: var(--green-dark); margin-bottom: 2px; }
+  .alert-option-btn .opt-desc { font-size: 12px; color: var(--text-light); font-weight: 400; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 80px;
+    left: 50%; transform: translateX(-50%) translateY(-20px);
+    background: var(--green-dark);
+    color: var(--white);
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    white-space: nowrap;
+    max-width: 320px;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.warning { background: var(--red); }
+  .toast.info { background: var(--gold); color: var(--green-dark); }
+
+  /* DAILY STATUS BADGE */
+  .daily-status {
+    margin: 10px 16px 0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .daily-status.visible { opacity: 1; }
+  .daily-status.over { background: var(--red-light); color: var(--red); }
+  .daily-status.under { background: #f0fff5; color: var(--green-mid); }
+
+  .no-records {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+    font-size: 14px;
+  }
+  .no-records .no-records-icon { font-size: 40px; margin-bottom: 10px; }
+
+  .income-hint {
+    margin: 10px 16px 0;
+    background: rgba(64,192,116,0.1);
+    border: 1.5px solid rgba(64,192,116,0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--green-mid);
+    font-weight: 500;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--cream-dark); border-radius: 999px; }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- SETUP SCREEN -->
+  <div class="setup-screen" id="setupScreen">
+    <div style="font-size:52px">💰</div>
+    <h2>Welcome to<br/>SmartSpender</h2>
+    <p>Enter your monthly income to get started. We'll calculate your daily allowance based on the remaining days.</p>
+    <div class="setup-input-wrap">
+      <span>$</span>
+      <input type="number" id="incomeInput" placeholder="0.00" min="0"/>
+    </div>
+    <button class="btn-primary" onclick="setupApp()">Start Tracking →</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon" onclick="resetApp()" title="Reset">⚙️</div>
+    <h1>SmartSpender</h1>
+    <div class="header-icon" title="Search">🔍</div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="calendar-section" id="calendarSection">
+    <div class="cal-header">
+      <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+      <h2 id="calMonthLabel">March, 2026</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="cal-nav" onclick="changeMonth(1)">›</button>
+        <span class="cal-icon">📅</span>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- SUMMARY BAR -->
+  <div class="summary-bar">
+    <div class="summary-item">
+      <div class="summary-label">Expense</div>
+      <div class="summary-value red" id="summaryExpense">$0.00</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Income</div>
+      <div class="summary-value green" id="summaryIncome">$0.00</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Total</div>
+      <div class="summary-value neutral" id="summaryTotal">$0.00</div>
+    </div>
+  </div>
+
+  <!-- DA CARD -->
+  <div class="da-card">
+    <div class="da-left">
+      <div class="da-label">Daily Allowance</div>
+      <div class="da-amount" id="daAmount">$0.00</div>
+    </div>
+    <div class="da-right">
+      <div class="da-label">Remaining Today</div>
+      <div class="remaining-amount" id="remainingToday">$0.00</div>
+    </div>
+  </div>
+
+  <!-- SAVINGS STRIP -->
+  <div class="savings-strip">
+    <span>💎 Total Savings (from surplus)</span>
+    <span class="savings-val" id="savingsVal">$0.00</span>
+  </div>
+
+  <!-- DAILY STATUS -->
+  <div class="daily-status" id="dailyStatus"></div>
+
+  <!-- TABS CONTENT -->
+  <div id="recordsTab">
+    <div class="records-section" id="recordsList"></div>
+  </div>
+  <div id="analysisTab" style="display:none">
+    <div class="analysis-section">
+      <div class="analysis-card">
+        <h3>📊 Spending by Category</h3>
+        <div id="catChart"></div>
+      </div>
+      <div class="analysis-card">
+        <h3>📈 Month Overview</h3>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-label">Total Income</div>
+            <div class="stat-val green" id="statIncome">$0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Expenses</div>
+            <div class="stat-val red" id="statExpense">$0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Savings</div>
+            <div class="stat-val green" id="statSavings">$0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Daily Allowance</div>
+            <div class="stat-val" id="statDA">$0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end app -->
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="openAddModal()">+</button>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="tab-btn active" id="tabRecords" onclick="switchTab('records')">
+    <span class="tab-icon">📋</span>Records
+  </button>
+  <button class="tab-btn" id="tabAnalysis" onclick="switchTab('analysis')">
+    <span class="tab-icon">📊</span>Analysis
+  </button>
+</div>
+
+<!-- ADD TRANSACTION MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Add Transaction</h3>
+    <div class="type-toggle">
+      <button class="type-btn active-expense" id="typeExpense" onclick="setType('expense')">💸 Expense</button>
+      <button class="type-btn" id="typeIncome" onclick="setType('income')">💵 Income</button>
+      <button class="type-btn" id="typeCurveball" onclick="setType('curveball')">🎲 Curveball</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Amount ($)</label>
+      <input class="form-input" type="number" id="txAmount" placeholder="0.00" min="0"/>
+    </div>
+    <div class="form-group" id="categoryGroup">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="txCategory">
+        <option value="Rent">🏠 Rent</option>
+        <option value="Food" selected>🍔 Food</option>
+        <option value="Transport">🚌 Transport</option>
+        <option value="Medical">💊 Medical</option>
+        <option value="Fun">🎉 Fun</option>
+        <option value="Bill">📄 Bill</option>
+        <option value="Shopping">🛍️ Shopping</option>
+        <option value="Other">📦 Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note (optional)</label>
+      <input class="form-input" type="text" id="txNote" placeholder="Add a note..."/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn-confirm" onclick="submitTransaction()">Add →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALERT MODAL -->
+<div class="modal-overlay" id="alertModal">
+  <div class="alert-modal">
+    <div class="modal-handle"></div>
+    <div class="alert-icon" id="alertIcon">⚠️</div>
+    <div class="alert-title" id="alertTitle">Alert</div>
+    <div class="alert-body" id="alertBody"></div>
+    <div class="alert-options" id="alertOptions"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  monthlyIncome: 0,
+  balance: 0,           // remaining balance after all expenses + savings used
+  savings: 0,
+  transactions: [],     // {id, date, type, amount, category, note}
+  selectedDate: null,   // YYYY-MM-DD string
+  viewMonth: null,      // {year, month} currently displayed
+  // per-date tracking
+  dailyExpenses: {},    // date -> total expenses that day
+  dailySurplus: {},     // date -> surplus acknowledged
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  const saved = localStorage.getItem('smartspender');
+  if (saved) {
+    state = JSON.parse(saved);
+    document.getElementById('setupScreen').style.display = 'none';
+    renderAll();
+  } else {
+    document.getElementById('setupScreen').style.display = 'flex';
+    const now = new Date();
+    state.viewMonth = {year: now.getFullYear(), month: now.getMonth()};
+    state.selectedDate = toDateStr(now);
+  }
+}
+
+function setupApp() {
+  const val = parseFloat(document.getElementById('incomeInput').value);
+  if (!val || val <= 0) { showToast('Please enter a valid income amount', 'warning'); return; }
+  state.monthlyIncome = val;
+  state.balance = val;
+  state.savings = 0;
+  state.transactions = [];
+  state.dailyExpenses = {};
+  state.dailySurplus = {};
+  const now = new Date();
+  state.viewMonth = {year: now.getFullYear(), month: now.getMonth()};
+  state.selectedDate = toDateStr(now);
+  saveState();
+  document.getElementById('setupScreen').style.display = 'none';
+  renderAll();
+  showToast('Welcome! Your daily allowance is set 🎉');
+}
+
+function resetApp() {
+  if (!confirm('Reset all data and start over?')) return;
+  localStorage.removeItem('smartspender');
+  location.reload();
+}
+
+// ─── DATE HELPERS ─────────────────────────────────────────────────────────────
+function toDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function parseDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function daysInMonth(year, month) {
+  return new Date(year, month+1, 0).getDate();
+}
+function remainingDaysInMonth(dateStr) {
+  const d = parseDate(dateStr);
+  const year = d.getFullYear(), month = d.getMonth(), day = d.getDate();
+  const total = daysInMonth(year, month);
+  return total - day + 1; // include today
+}
+function formatCurrency(n) {
+  const abs = Math.abs(n).toFixed(2);
+  return n < 0 ? `-$${abs}` : `$${abs}`;
+}
+function formatDate(str) {
+  const d = parseDate(str);
+  return d.toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric'});
+}
+
+// ─── CALCULATIONS ─────────────────────────────────────────────────────────────
+function calcDA() {
+  if (!state.selectedDate) return 0;
+  const remDays = remainingDaysInMonth(state.selectedDate);
+  if (remDays <= 0) return 0;
+  return Math.max(0, state.balance / remDays);
+}
+
+function getTodayExpenses() {
+  return (state.dailyExpenses[state.selectedDate] || 0);
+}
+
+function getRemainingToday() {
+  const da = calcDA();
+  const spent = getTodayExpenses();
+  return da - spent;
+}
+
+// ─── RENDER ALL ───────────────────────────────────────────────────────────────
+function renderAll() {
+  renderCalendar();
+  renderSummaryBar();
+  renderDACard();
+  renderRecords();
+  renderAnalysis();
+}
+
+function renderCalendar() {
+  if (!state.viewMonth) return;
+  const {year, month} = state.viewMonth;
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent = `${monthNames[month]}, ${year}`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Day labels
+  ['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const totalDays = daysInMonth(year, month);
+
+  // Blank cells
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-cell empty';
+    grid.appendChild(el);
+  }
+
+  // Dates with transaction dots
+  const txDates = new Set(state.transactions.map(t => t.date));
+
+  for (let d = 1; d <= totalDays; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    el.className = 'cal-cell';
+    el.textContent = d;
+    if (txDates.has(dateStr)) {
+      el.classList.add('has-dot');
+      const hasExp = state.transactions.some(t => t.date === dateStr && t.type !== 'income');
+      if (hasExp) el.classList.add('has-expense');
+    }
+    if (dateStr === state.selectedDate) el.classList.add('selected');
+    el.onclick = () => selectDate(dateStr);
+    grid.appendChild(el);
+  }
+}
+
+function renderSummaryBar() {
+  const {year, month} = state.viewMonth;
+  const prefix = `${year}-${String(month+1).padStart(2,'0')}`;
+  const monthTx = state.transactions.filter(t => t.date.startsWith(prefix));
+  const totalExp = monthTx.filter(t => t.type !== 'income').reduce((s,t) => s+t.amount, 0);
+  const totalInc = monthTx.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+  const net = totalInc - totalExp;
+
+  document.getElementById('summaryExpense').textContent = `-$${totalExp.toFixed(2)}`;
+  document.getElementById('summaryIncome').textContent = `$${totalInc.toFixed(2)}`;
+  document.getElementById('summaryTotal').textContent = formatCurrency(net);
+  document.getElementById('summaryTotal').className = `summary-value ${net < 0 ? 'red' : net > 0 ? 'green' : 'neutral'}`;
+}
+
+function renderDACard() {
+  const da = calcDA();
+  const remaining = getRemainingToday();
+  const remEl = document.getElementById('remainingToday');
+
+  document.getElementById('daAmount').textContent = formatCurrency(da);
+  remEl.textContent = formatCurrency(remaining);
+  remEl.className = `remaining-amount${remaining < 0 ? ' negative' : ''}`;
+  document.getElementById('savingsVal').textContent = formatCurrency(state.savings);
+
+  // Daily status badge
+  const badge = document.getElementById('dailyStatus');
+  const spent = getTodayExpenses();
+  if (spent > 0) {
+    badge.classList.add('visible');
+    if (remaining < 0) {
+      badge.className = 'daily-status visible over';
+      badge.innerHTML = `⚠️ Overspent by ${formatCurrency(Math.abs(remaining))} today — DA recalculated`;
+    } else {
+      badge.className = 'daily-status visible under';
+      badge.innerHTML = `✅ ${formatCurrency(remaining)} left for today — great pacing!`;
+    }
+  } else {
+    badge.className = 'daily-status';
+    badge.innerHTML = '';
+  }
+}
+
+function renderRecords() {
+  const list = document.getElementById('recordsList');
+  // Filter to selected month
+  const {year, month} = state.viewMonth;
+  const prefix = `${year}-${String(month+1).padStart(2,'0')}`;
+  const monthTx = state.transactions.filter(t => t.date.startsWith(prefix));
+
+  if (monthTx.length === 0) {
+    list.innerHTML = `<div class="no-records"><div class="no-records-icon">📭</div>No transactions yet.<br/>Tap + to add one.</div>`;
+    return;
+  }
+
+  // Group by date descending
+  const grouped = {};
+  monthTx.forEach(t => {
+    if (!grouped[t.date]) grouped[t.date] = [];
+    grouped[t.date].push(t);
+  });
+  const sortedDates = Object.keys(grouped).sort((a,b) => b.localeCompare(a));
+
+  list.innerHTML = '';
+  sortedDates.forEach(date => {
+    const wrap = document.createElement('div');
+    wrap.className = 'day-group';
+    const label = document.createElement('div');
+    label.className = 'day-group-label';
+    label.textContent = formatDate(date);
+    wrap.appendChild(label);
+
+    grouped[date].forEach(tx => {
+      const card = document.createElement('div');
+      card.className = 'record-card';
+      const icons = {expense:'💸', income:'💵', curveball:'🎲'};
+      const iconClass = {expense:'expense', income:'income', curveball:'curveball'};
+      card.innerHTML = `
+        <div class="record-icon ${iconClass[tx.type]}">${icons[tx.type]}</div>
+        <div class="record-info">
+          <div class="record-type">${tx.type === 'curveball' ? '🎲 Curveball' : tx.type.charAt(0).toUpperCase()+tx.type.slice(1)} ${tx.category ? '· '+tx.category : ''}</div>
+          <div class="record-note">${tx.note || 'No note'}</div>
+        </div>
+        <div class="record-amount ${tx.type === 'income' ? 'green' : 'red'}">${tx.type === 'income' ? '+' : '-'}$${tx.amount.toFixed(2)}</div>
+      `;
+      wrap.appendChild(card);
+    });
+    list.appendChild(wrap);
+  });
+}
+
+function renderAnalysis() {
+  // Category breakdown
+  const catColors = {
+    Rent:'#e63946', Food:'#f4a261', Transport:'#457b9d',
+    Medical:'#e76f51', Fun:'#52b788', Bill:'#6d6875',
+    Shopping:'#f77f00', Other:'#adb5bd'
+  };
+  const catTotals = {};
+  state.transactions.filter(t => t.type !== 'income').forEach(t => {
+    catTotals[t.category || 'Other'] = (catTotals[t.category || 'Other'] || 0) + t.amount;
+  });
+  const maxVal = Math.max(...Object.values(catTotals), 1);
+  const chart = document.getElementById('catChart');
+  if (Object.keys(catTotals).length === 0) {
+    chart.innerHTML = '<div style="text-align:center;color:var(--text-light);font-size:13px;padding:20px">No expenses yet</div>';
+  } else {
+    chart.innerHTML = Object.entries(catTotals)
+      .sort((a,b) => b[1]-a[1])
+      .map(([cat, amt]) => `
+        <div class="cat-row">
+          <div class="cat-label">${cat}</div>
+          <div class="cat-bar-wrap"><div class="cat-bar" style="width:${(amt/maxVal*100).toFixed(1)}%;background:${catColors[cat]||'#aaa'}"></div></div>
+          <div class="cat-amount">$${amt.toFixed(0)}</div>
+        </div>
+      `).join('');
+  }
+  // Stats
+  const da = calcDA();
+  const totalExpAll = state.transactions.filter(t=>t.type!=='income').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('statIncome').textContent = `$${state.monthlyIncome.toFixed(0)}`;
+  document.getElementById('statExpense').textContent = `$${totalExpAll.toFixed(0)}`;
+  document.getElementById('statSavings').textContent = `$${state.savings.toFixed(0)}`;
+  document.getElementById('statDA').textContent = `$${da.toFixed(0)}`;
+}
+
+// ─── DATE SELECTION ────────────────────────────────────────────────────────────
+function selectDate(dateStr) {
+  const prevDate = state.selectedDate;
+
+  // Check if previous day had a surplus that wasn't handled
+  if (prevDate && prevDate !== dateStr) {
+    checkDaySurplus(prevDate, dateStr);
+    return; // surplus check will call finalizeSelectDate
+  }
+  finalizeSelectDate(dateStr);
+}
+
+function checkDaySurplus(prevDate, newDate) {
+  const da = calcDA();
+  const prevSpent = state.dailyExpenses[prevDate] || 0;
+  const prevSurplus = da - prevSpent;
+
+  if (prevSurplus > 0.01 && !state.dailySurplus[prevDate] && prevSpent > 0) {
+    // Show surplus alert
+    showAlert(
+      '💰',
+      'Daily Surplus!',
+      `You spent <strong>${formatCurrency(prevSpent)}</strong> on ${formatDate(prevDate)}, leaving a surplus of <strong>${formatCurrency(prevSurplus)}</strong>.<br/><br/>What would you like to do with it?`,
+      [
+        {
+          title: '💎 Add to Savings',
+          desc: `Move ${formatCurrency(prevSurplus)} to your savings pool`,
+          action: () => {
+            state.savings += prevSurplus;
+            state.dailySurplus[prevDate] = 'savings';
+            saveState();
+            showToast(`${formatCurrency(prevSurplus)} added to savings! 💎`);
+            finalizeSelectDate(newDate);
+          }
+        },
+        {
+          title: '📈 Boost Balance & Recalculate DA',
+          desc: 'Keep it in balance — increases tomorrow\'s daily allowance',
+          action: () => {
+            // balance already includes it since we never deducted savings
+            state.dailySurplus[prevDate] = 'balance';
+            saveState();
+            showToast('Balance boosted! DA recalculated 📈', 'info');
+            finalizeSelectDate(newDate);
+          }
+        }
+      ]
+    );
+  } else {
+    finalizeSelectDate(newDate);
+  }
+}
+
+function finalizeSelectDate(dateStr) {
+  closeModal('alertModal');
+  state.selectedDate = dateStr;
+  // If the date is in a different month, update viewMonth
+  const d = parseDate(dateStr);
+  state.viewMonth = {year: d.getFullYear(), month: d.getMonth()};
+  saveState();
+  renderAll();
+}
+
+function changeMonth(delta) {
+  let {year, month} = state.viewMonth;
+  month += delta;
+  if (month < 0) { month = 11; year--; }
+  if (month > 11) { month = 0; year++; }
+  state.viewMonth = {year, month};
+  renderCalendar();
+}
+
+// ─── ADD TRANSACTION ──────────────────────────────────────────────────────────
+let currentType = 'expense';
+function openAddModal() {
+  if (!state.selectedDate) { showToast('Please select a date first', 'warning'); return; }
+  currentType = 'expense';
+  document.getElementById('txAmount').value = '';
+  document.getElementById('txNote').value = '';
+  updateTypeUI();
+  openModal('addModal');
+}
+
+function setType(t) {
+  currentType = t;
+  updateTypeUI();
+}
+function updateTypeUI() {
+  ['expense','income','curveball'].forEach(t => {
+    document.getElementById('type'+t.charAt(0).toUpperCase()+t.slice(1)).className =
+      `type-btn${currentType===t ? ` active-${t}` : ''}`;
+  });
+  document.getElementById('categoryGroup').style.display =
+    currentType === 'income' ? 'none' : 'block';
+}
+
+function submitTransaction() {
+  const amt = parseFloat(document.getElementById('txAmount').value);
+  if (!amt || amt <= 0) { showToast('Enter a valid amount', 'warning'); return; }
+  const category = currentType !== 'income' ? document.getElementById('txCategory').value : null;
+  const note = document.getElementById('txNote').value.trim();
+
+  const tx = {
+    id: Date.now(),
+    date: state.selectedDate,
+    type: currentType,
+    amount: amt,
+    category,
+    note
+  };
+
+  if (currentType === 'income') {
+    state.monthlyIncome += amt;
+    state.balance += amt;
+    state.transactions.push(tx);
+    saveState();
+    closeModal('addModal');
+    renderAll();
+    showToast(`Income of $${amt.toFixed(2)} added! 💵`);
+    return;
+  }
+
+  if (currentType === 'curveball') {
+    handleCurveball(tx);
+    return;
+  }
+
+  // Regular expense
+  addExpense(tx);
+}
+
+/*function addExpense(tx) {
+  state.transactions.push(tx);
+  state.dailyExpenses[tx.date] = (state.dailyExpenses[tx.date] || 0) + tx.amount;
+  state.balance -= tx.amount;
+
+  const da = calcDA(); // recalculated after balance change
+  const tdyexp = state.dailyExpenses[tx.date];
+  const remaining = da - tdyexp;
+
+  saveState();
+  closeModal('addModal');
+  renderAll();
+
+  if (remaining < 0) {
+    // Over DA — show red alert
+    showToast(`⚠️ Over daily limit by ${formatCurrency(Math.abs(remaining))}! DA recalculated`, 'warning');
+  } else {
+    showToast(`Expense added — ${formatCurrency(remaining)} left today`);
+  }
+}*/
+function addExpense(tx) {
+  state.transactions.push(tx);
+
+  const prevDA = calcDA(); // get current DA before deduction
+
+  state.dailyExpenses[tx.date] = (state.dailyExpenses[tx.date] || 0) + tx.amount;
+
+  const todaySpent = state.dailyExpenses[tx.date];
+
+  // 🔥 Only reduce balance if overspending
+  if (todaySpent > prevDA) {
+    const extra = todaySpent - prevDA;
+    state.balance -= extra; // deduct only excess
+  }
+
+  const newDA = calcDA();
+  const remaining = prevDA - todaySpent;
+
+  saveState();
+  closeModal('addModal');
+  renderAll();
+
+  if (todaySpent > prevDA) {
+    showToast(`⚠️ Exceeded DA! New DA: ${formatCurrency(newDA)}`, 'warning');
+  } else {
+    showToast(`Within limit 👍 ${formatCurrency(remaining)} left today`);
+  }
+}
+
+function handleCurveball(tx) {
+  closeModal('addModal');
+  const canUseSavings = state.savings >= tx.amount;
+
+  showAlert(
+    '🎲',
+    'Financial Curveball!',
+    `Unexpected expense of <strong>${formatCurrency(tx.amount)}</strong> for <strong>${tx.category}</strong>${tx.note ? ` (${tx.note})` : ''}.<br/><br/>How would you like to cover this?`,
+    [
+      ...(canUseSavings ? [{
+        title: `💎 Use Savings (${formatCurrency(state.savings)} available)`,
+        desc: 'Draw from your savings pool — balance unchanged',
+        action: () => {
+          state.savings -= tx.amount;
+          state.transactions.push(tx);
+          saveState();
+          closeModal('alertModal');
+          renderAll();
+          showToast(`Covered from savings! ${formatCurrency(state.savings)} savings left 💎`);
+        }
+      }] : []),
+      {
+        title: '📉 Deduct from Balance & Recalculate DA',
+        desc: 'Reduces your remaining budget — DA will drop',
+        action: () => {
+          state.balance -= tx.amount;
+          state.dailyExpenses[tx.date] = (state.dailyExpenses[tx.date] || 0) + tx.amount;
+          state.transactions.push(tx);
+          const newDA = calcDA();
+          saveState();
+          closeModal('alertModal');
+          renderAll();
+          showToast(`DA recalculated to ${formatCurrency(newDA)} 📉`, 'warning');
+        }
+      }
+    ]
+  );
+}
+
+// ─── MODAL HELPERS ────────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function showAlert(icon, title, body, options) {
+  document.getElementById('alertIcon').textContent = icon;
+  document.getElementById('alertTitle').textContent = title;
+  document.getElementById('alertBody').innerHTML = body;
+  const opts = document.getElementById('alertOptions');
+  opts.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'alert-option-btn';
+    btn.innerHTML = `<div class="opt-title">${opt.title}</div><div class="opt-desc">${opt.desc}</div>`;
+    btn.onclick = opt.action;
+    opts.appendChild(btn);
+  });
+  openModal('alertModal');
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('recordsTab').style.display = tab === 'records' ? '' : 'none';
+  document.getElementById('analysisTab').style.display = tab === 'analysis' ? '' : 'none';
+  document.getElementById('tabRecords').className = `tab-btn${tab==='records' ? ' active' : ''}`;
+  document.getElementById('tabAnalysis').className = `tab-btn${tab==='analysis' ? ' active' : ''}`;
+  if (tab === 'analysis') renderAnalysis();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = `toast ${type}`, 2800);
+}
+
+// ─── PERSIST ──────────────────────────────────────────────────────────────────
+function saveState() {
+  localStorage.setItem('smartspender', JSON.stringify(state));
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
